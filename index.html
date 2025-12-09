@@ -1,0 +1,2584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Roccia Transportes - Gestão de Cargas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+            position: relative;
+            overflow-y: auto;
+            border-right: 2px solid #B71C1C;
+        }
+
+        .logo {
+            text-align: center;
+            padding: 0 1rem 2rem;
+            border-bottom: 1px solid #B71C1C;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            color: #B71C1C;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            letter-spacing: 2px;
+        }
+
+        .logo p {
+            font-size: 0.9rem;
+            color: #888;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            margin: 0.5rem 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(183, 28, 28, 0.2);
+            border-left-color: #B71C1C;
+            transform: translateX(5px);
+            box-shadow: inset 0 0 20px rgba(183, 28, 28, 0.1);
+        }
+
+        .nav-icon {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #B71C1C;
+        }
+
+        .header h2 {
+            color: #B71C1C;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .add-btn {
+            background: linear-gradient(45deg, #B71C1C, #8B0000);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(183, 28, 28, 0.3);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(183, 28, 28, 0.4);
+            background: linear-gradient(45deg, #D32F2F, #B71C1C);
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .cargo-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border-left: 5px solid;
+        }
+
+        .cargo-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.15), 0 0 20px rgba(183, 28, 28, 0.1);
+        }
+
+        .cargo-card.cliente-1 { border-left-color: #B71C1C; }
+        .cargo-card.cliente-2 { border-left-color: #D32F2F; }
+        .cargo-card.cliente-3 { border-left-color: #757575; }
+        .cargo-card.cliente-4 { border-left-color: #8B0000; }
+        .cargo-card.cliente-5 { border-left-color: #424242; }
+        .cargo-card.cliente-6 { border-left-color: #5D4037; }
+        .cargo-card.cliente-7 { border-left-color: #BF360C; }
+        .cargo-card.cliente-8 { border-left-color: #6A1B9A; }
+        .cargo-card.cliente-9 { border-left-color: #E65100; }
+        .cargo-card.cliente-10 { border-left-color: #1565C0; }
+        .cargo-card.cliente-11 { border-left-color: #2E7D32; }
+        .cargo-card.cliente-12 { border-left-color: #F57C00; }
+        .cargo-card.cliente-13 { border-left-color: #7B1FA2; }
+        .cargo-card.cliente-14 { border-left-color: #0277BD; }
+        .cargo-card.cliente-15 { border-left-color: #388E3C; }
+        .cargo-card.cliente-16 { border-left-color: #FF5722; }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .cargo-number {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status.em-transito {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .status.entregue {
+            background: #E8F5E8;
+            color: #2E7D32;
+        }
+
+        .status.em-aberto {
+            background: #FFEBEE;
+            color: #B71C1C;
+        }
+
+        .card-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 0.2rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .card-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            opacity: 0;
+        }
+
+        .cargo-card:hover .card-details {
+            max-height: 300px;
+            opacity: 1;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #B71C1C;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.8rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #B71C1C;
+            box-shadow: 0 0 0 3px rgba(183, 28, 28, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #B71C1C, #8B0000);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(183, 28, 28, 0.4);
+            background: linear-gradient(45deg, #D32F2F, #B71C1C);
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #B71C1C;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Connection Status */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ff4444;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.online {
+            background: #44ff44;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Modal de Detalhes */
+        .detalhes-container {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .detalhes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .detalhes-numero {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #B71C1C;
+        }
+
+        .detalhes-status {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .detalhes-status.em-transito {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .detalhes-status.entregue {
+            background: #E8F5E8;
+            color: #2E7D32;
+        }
+
+        .detalhes-status.em-aberto {
+            background: #FFEBEE;
+            color: #B71C1C;
+        }
+
+        .detalhes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .detalhes-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #B71C1C;
+        }
+
+        .detalhes-section.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detalhes-section h4 {
+            margin: 0 0 1rem 0;
+            color: #2c3e50;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detalhes-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.8rem 0;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .detalhes-item:last-child {
+            border-bottom: none;
+        }
+
+        .detalhes-label {
+            font-weight: 600;
+            color: #6c757d;
+            flex-shrink: 0;
+            margin-right: 1rem;
+        }
+
+        .detalhes-value {
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: right;
+        }
+
+        .detalhes-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 2px solid #ecf0f1;
+        }
+
+        .detalhes-actions .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .click-hint {
+            text-align: center; 
+            margin-top: 1rem; 
+            color: #7f8c8d; 
+            font-size: 0.8rem;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .cargo-card:hover .click-hint {
+            opacity: 1;
+            color: #B71C1C;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .detalhes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .detalhes-actions {
+                flex-direction: column;
+            }
+            
+            .detalhes-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
+            }
+            
+            .detalhes-value {
+                text-align: left;
+            }
+        }
+            .detalhes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .detalhes-actions {
+                flex-direction: column;
+            }
+            
+            .detalhes-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
+            }
+            
+            .detalhes-value {
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h1>ROCCIA</h1>
+                <p>TRANSPORTES</p>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="showSection('dashboard')">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('fretes-andamento')">
+                        <span class="nav-icon">🚛</span>
+                        Fretes em Andamento
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('historico')">
+                        <span class="nav-icon">📋</span>
+                        Histórico de Cargas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('saldos')">
+                        <span class="nav-icon">💰</span>
+                        Gestão de Saldos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('clientes')">
+                        <span class="nav-icon">🏢</span>
+                        Clientes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('motoristas')">
+                        <span class="nav-icon">👨‍💼</span>
+                        Motoristas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('relatorios')">
+                        <span class="nav-icon">📈</span>
+                        Relatórios
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <div class="header">
+                    <h2>Dashboard</h2>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="connection-status">
+                            <div class="status-indicator" id="status-indicator"></div>
+                            <span id="connection-status">Conectando...</span>
+                        </div>
+                        <span id="current-date"></span>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-cargas">4</div>
+                        <div class="stat-label">Cargas Ativas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="em-transito">2</div>
+                        <div class="stat-label">Em Trânsito</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="entregues">1</div>
+                        <div class="stat-label">Entregues</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">R$ 8.711,69</div>
+                        <div class="stat-label">Receita do Mês</div>
+                    </div>
+                </div>
+                
+                <div class="header">
+                    <h3>Últimas Cargas Adicionadas</h3>
+                </div>
+                <div class="cards-grid" id="recent-cargas"></div>
+            </section>
+
+            <!-- Fretes em Andamento Section -->
+            <section id="fretes-andamento" class="section">
+                <div class="header">
+                    <h2>Fretes em Andamento</h2>
+                    <button class="add-btn" onclick="openModal()">+ Nova Carga</button>
+                </div>
+                <div class="cards-grid" id="cargas-grid"></div>
+            </section>
+
+            <!-- Other sections remain the same -->
+            <section id="historico" class="section">
+                <div class="header">
+                    <h2>Histórico de Cargas</h2>
+                    <button class="add-btn">Filtrar</button>
+                </div>
+                <div class="cards-grid" id="historico-grid"></div>
+            </section>
+
+            <section id="saldos" class="section">
+                <div class="header">
+                    <h2>Gestão de Saldos</h2>
+                    <button class="add-btn">Novo Saldo</button>
+                </div>
+                <p>Seção de saldos em desenvolvimento...</p>
+            </section>
+
+            <!-- Clientes Section -->
+            <section id="clientes" class="section">
+                <div class="header">
+                    <h2>Gestão de Clientes</h2>
+                    <button class="add-btn" onclick="openClienteModal()">+ Novo Cliente</button>
+                </div>
+                
+                <!-- Grid de clientes será renderizado aqui -->
+                <div class="cards-grid" id="clientes-grid">
+                    <div style="grid-column: 1 / -1; text-align: center; color: #7f8c8d; padding: 2rem;">
+                        Carregando clientes...
+                    </div>
+                </div>
+            </section>
+
+            <section id="motoristas" class="section">
+                <div class="header">
+                    <h2>Gestão de Motoristas</h2>
+                    <button class="add-btn">Novo Motorista</button>
+                </div>
+                <p>Seção de motoristas em desenvolvimento...</p>
+            </section>
+
+            <section id="relatorios" class="section">
+                <div class="header">
+                    <h2>Relatórios</h2>
+                    <button class="add-btn">Gerar Relatório</button>
+                </div>
+                <p>Seção de relatórios em desenvolvimento...</p>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Nova Carga</h2>
+            <form id="carga-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data da Carga</label>
+                        <input type="date" id="data-carga" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Origem</label>
+                        <input type="text" id="origem" placeholder="Ex: JAGUARIÚNA SP" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Destino</label>
+                        <input type="text" id="destino" placeholder="Ex: BARCARENA PA" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Motorista</label>
+                        <input type="text" id="motorista" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cliente</label>
+                        <select id="cliente" required>
+                            <option value="">Selecione...</option>
+                            <!-- Opções serão carregadas dinamicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Peso (TON)</label>
+                        <input type="number" id="peso" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" id="valor" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="status" required>
+                            <option value="">Selecione...</option>
+                            <option value="em-transito">Em Trânsito</option>
+                            <option value="entregue">Entregue</option>
+                            <option value="em-aberto">Em Aberto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <input type="text" id="observacoes">
+                    </div>
+                </div>
+                <button type="submit" class="btn">Salvar Carga</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Cliente -->
+    <div id="cliente-detalhes-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeClienteDetalhesModal()">&times;</span>
+            <h2 id="cliente-detalhes-titulo">Detalhes do Cliente</h2>
+            
+            <div class="detalhes-container">
+                <!-- Header com Nome -->
+                <div class="detalhes-header">
+                    <div class="detalhes-numero" id="cliente-detalhes-nome"></div>
+                    <div class="detalhes-status" id="cliente-detalhes-status-ativo"></div>
+                </div>
+
+                <!-- Grid de Informações -->
+                <div class="detalhes-grid">
+                    <div class="detalhes-section">
+                        <h4>🏢 Dados da Empresa</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Razão Social:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-razao"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">CNPJ:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-cnpj"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Código:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-codigo"></span>
+                        </div>
+                    </div>
+
+                    <div class="detalhes-section">
+                        <h4>📞 Contato</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Telefone:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-telefone"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Email:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-email"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Contato:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-contato"></span>
+                        </div>
+                    </div>
+
+                    <div class="detalhes-section">
+                        <h4>📍 Localização</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Endereço:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-endereco"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Cidade:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-cidade"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Estado:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-estado"></span>
+                        </div>
+                    </div>
+
+                    <div class="detalhes-section">
+                        <h4>📊 Estatísticas</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Total de Cargas:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-total-cargas">-</span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Receita Gerada:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-receita">-</span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Última Carga:</span>
+                            <span class="detalhes-value" id="cliente-detalhes-ultima-carga">-</span>
+                        </div>
+                    </div>
+
+                    <div class="detalhes-section full-width">
+                        <h4>📝 Observações</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-value" id="cliente-detalhes-observacoes">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="detalhes-actions">
+                    <button class="btn" onclick="editarCliente()">✏️ Editar</button>
+                    <button class="btn" onclick="verCargasCliente()">🚛 Ver Cargas</button>
+                    <button class="btn" onclick="toggleClienteAtivo()">🔄 Ativar/Desativar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Adicionar/Editar Cliente -->
+    <div id="cliente-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeClienteModal()">&times;</span>
+            <h2 id="cliente-modal-titulo">Novo Cliente</h2>
+            <form id="cliente-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Razão Social / Nome *</label>
+                        <input type="text" id="cliente-nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Código do Cliente</label>
+                        <input type="text" id="cliente-codigo" placeholder="Ex: CLI001">
+                    </div>
+                    <div class="form-group">
+                        <label>CNPJ</label>
+                        <input type="text" id="cliente-cnpj" placeholder="00.000.000/0001-00">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="text" id="cliente-telefone" placeholder="(11) 99999-9999">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="cliente-email" placeholder="contato@empresa.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Pessoa de Contato</label>
+                        <input type="text" id="cliente-contato" placeholder="Nome do responsável">
+                    </div>
+                    <div class="form-group">
+                        <label>Endereço</label>
+                        <input type="text" id="cliente-endereco" placeholder="Rua, número">
+                    </div>
+                    <div class="form-group">
+                        <label>Cidade</label>
+                        <input type="text" id="cliente-cidade" placeholder="São Paulo">
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="cliente-estado">
+                            <option value="">Selecione...</option>
+                            <option value="SP">São Paulo</option>
+                            <option value="RJ">Rio de Janeiro</option>
+                            <option value="MG">Minas Gerais</option>
+                            <option value="RS">Rio Grande do Sul</option>
+                            <option value="PR">Paraná</option>
+                            <option value="SC">Santa Catarina</option>
+                            <option value="GO">Goiás</option>
+                            <option value="MT">Mato Grosso</option>
+                            <option value="BA">Bahia</option>
+                            <!-- Adicionar outros estados conforme necessário -->
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Observações</label>
+                        <textarea id="cliente-observacoes" rows="3" placeholder="Informações adicionais sobre o cliente..."></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Salvar Cliente</button>
+            </form>
+        </div>
+    </div>
+        <div class="modal-content">
+            <span class="close" onclick="closeDetalhesModal()">&times;</span>
+            <h2 id="detalhes-titulo">Detalhes da Carga</h2>
+            
+            <div class="detalhes-container">
+                <!-- Header com Status -->
+                <div class="detalhes-header">
+                    <div class="detalhes-numero" id="detalhes-numero"></div>
+                    <div class="detalhes-status" id="detalhes-status"></div>
+                </div>
+
+                <!-- Grid de Informações Principais -->
+                <div class="detalhes-grid">
+                    <div class="detalhes-section">
+                        <h4>📍 Rota</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Origem:</span>
+                            <span class="detalhes-value" id="detalhes-origem"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Destino:</span>
+                            <span class="detalhes-value" id="detalhes-destino"></span>
+                        </div>
+                    </div>
+
+                    <div class="detalhes-section">
+                        <h4>👨‍💼 Responsáveis</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Motorista:</span>
+                            <span class="detalhes-value" id="detalhes-motorista"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Cliente:</span>
+                            <span class="detalhes-value" id="detalhes-cliente"></span>
+                        </div>
+                    </div>
+
+                    <div class="detalhes-section">
+                        <h4>📦 Carga</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Peso:</span>
+                            <span class="detalhes-value" id="detalhes-peso"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Mercadoria:</span>
+                            <span class="detalhes-value" id="detalhes-mercadoria">Geral</span>
+                        </div>
+                    </div>
+
+                    <div class="detalhes-section">
+                        <h4>💰 Financeiro</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Valor do Frete:</span>
+                            <span class="detalhes-value" id="detalhes-valor"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Comissão Motorista:</span>
+                            <span class="detalhes-value" id="detalhes-comissao">80%</span>
+                        </div>
+                    </div>
+
+                    <div class="detalhes-section">
+                        <h4>📅 Datas</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Data da Carga:</span>
+                            <span class="detalhes-value" id="detalhes-data-carga"></span>
+                        </div>
+                        <div class="detalhes-item">
+                            <span class="detalhes-label">Data de Entrega:</span>
+                            <span class="detalhes-value" id="detalhes-data-entrega">-</span>
+                        </div>
+                    </div>
+
+                    <div class="detalhes-section full-width">
+                        <h4>📝 Observações</h4>
+                        <div class="detalhes-item">
+                            <span class="detalhes-value" id="detalhes-observacoes">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="detalhes-actions">
+                    <button class="btn" onclick="editarCarga()">✏️ Editar</button>
+                    <button class="btn" onclick="marcarEntregue()">✅ Marcar como Entregue</button>
+                    <button class="btn" onclick="gerarRelatorio()">📄 Gerar Relatório</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // =====================
+        // CONFIGURAÇÃO SUPABASE
+        // =====================
+        
+        // 🔥 SUAS CREDENCIAIS DO SUPABASE:
+        const SUPABASE_URL = 'https://sanynuxxqlgastsoxlcq.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhbnludXh4cWxnYXN0c294bGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2MTQzNDQsImV4cCI6MjA3MzE5MDM0NH0._tG7p6R7-eocXKv4jXdlQednHhltiIakegYc3IOR2Lw'
+        
+        // Verificar se Supabase carregou
+        if (typeof supabase === 'undefined') {
+            console.error('❌ Supabase não carregou. Usando modo offline.');
+            window.supabaseClient = null;
+        } else {
+            // Inicializar Supabase
+            const { createClient } = supabase
+            window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            console.log('✅ Supabase inicializado com sucesso');
+        }
+        
+        // =====================
+        // CLASSE DE INTEGRAÇÃO
+        // =====================
+        class RocciaDB {
+            constructor() {
+                this.supabase = window.supabaseClient
+                this.isOnline = false
+                if (this.supabase) {
+                    this.checkConnection()
+                } else {
+                    console.log('📱 Modo offline - Supabase não disponível')
+                    this.updateConnectionStatus(false, 'Offline - Supabase não carregado')
+                }
+            }
+            
+            async checkConnection() {
+                try {
+                    console.log('🔍 Testando conexão com Supabase...')
+                    
+                    // Teste de conectividade básica
+                    const { data, error } = await this.supabase.from('clientes').select('count').limit(1)
+                    
+                    if (error) {
+                        console.error('❌ Erro na conexão:', error.message)
+                        this.updateConnectionStatus(false, `Erro: ${error.message}`)
+                        return
+                    }
+                    
+                    this.isOnline = true
+                    console.log('✅ Supabase conectado com sucesso!')
+                    this.updateConnectionStatus(true, 'Online')
+                    
+                    // Carregar dados do Supabase
+                    await this.carregarDadosIniciais()
+                    
+                } catch (err) {
+                    console.error('❌ Erro de rede:', err)
+                    this.isOnline = false
+                    this.updateConnectionStatus(false, 'Offline - Dados locais')
+                }
+            }
+            
+            async carregarDadosIniciais() {
+                try {
+                    console.log('📊 Carregando dados do Supabase...')
+                    
+                    // Carregar clientes
+                    const clientesData = await this.buscarClientes()
+                    if (clientesData && clientesData.length > 0) {
+                        // Atualizar array local de clientes
+                        clientes.length = 0 // Limpar array
+                        clientesData.forEach(cliente => {
+                            clientes.push({
+                                id: cliente.id,
+                                nome: cliente.nome,
+                                codigo: cliente.codigo,
+                                cnpj: cliente.cnpj,
+                                telefone: cliente.telefone,
+                                email: cliente.email,
+                                contato: cliente.contato_responsavel,
+                                endereco: cliente.endereco,
+                                cidade: cliente.endereco ? cliente.endereco.split(',')[1]?.trim() : '',
+                                estado: cliente.endereco ? cliente.endereco.split(',')[2]?.trim() : '',
+                                ativo: cliente.ativo,
+                                observacoes: cliente.observacoes,
+                                created_at: new Date(cliente.created_at)
+                            })
+                        })
+                        console.log(`✅ ${clientes.length} clientes carregados do Supabase`)
+                        
+                        // Atualizar interface
+                        renderClientes()
+                        atualizarSelectClientes()
+                    }
+                    
+                    // Carregar cargas (se houver)
+                    const cargasData = await this.buscarCargas()
+                    if (cargasData && cargasData.length > 0) {
+                        console.log(`✅ ${cargasData.length} cargas carregadas do Supabase`)
+                        // Processar cargas aqui se necessário
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao carregar dados iniciais:', error)
+                }
+            }
+            
+            async buscarClientes() {
+                if (!this.isOnline) return null
+                
+                try {
+                    const { data, error } = await this.supabase
+                        .from('clientes')
+                        .select('*')
+                        .order('nome')
+                    
+                    if (error) {
+                        console.error('❌ Erro ao buscar clientes:', error)
+                        return null
+                    }
+                    
+                    return data
+                } catch (error) {
+                    console.error('❌ Erro de rede ao buscar clientes:', error)
+                    return null
+                }
+            }
+            
+            async buscarCargas() {
+                if (!this.isOnline) return null
+                
+                try {
+                    const { data, error } = await this.supabase
+                        .from('cargas')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                    
+                    if (error) {
+                        console.error('❌ Erro ao buscar cargas:', error)
+                        return null
+                    }
+                    
+                    return data
+                } catch (error) {
+                    console.error('❌ Erro de rede ao buscar cargas:', error)
+                    return null
+                }
+            }
+            
+            async adicionarCliente(clienteData) {
+                if (!this.isOnline) {
+                    console.log('📱 Modo offline - adicionando cliente localmente')
+                    return null
+                }
+                
+                try {
+                    console.log('💾 Salvando cliente no Supabase...', clienteData.nome)
+                    
+                    const { data, error } = await this.supabase
+                        .from('clientes')
+                        .insert([{
+                            nome: clienteData.nome,
+                            codigo: clienteData.codigo,
+                            cnpj: clienteData.cnpj,
+                            telefone: clienteData.telefone,
+                            email: clienteData.email,
+                            contato_responsavel: clienteData.contato,
+                            endereco: `${clienteData.endereco}, ${clienteData.cidade}, ${clienteData.estado}`,
+                            ativo: true,
+                            observacoes: clienteData.observacoes
+                        }])
+                        .select()
+                    
+                    if (error) {
+                        console.error('❌ Erro ao salvar cliente no Supabase:', error)
+                        return null
+                    }
+                    
+                    console.log('✅ Cliente salvo no banco:', data[0])
+                    return data[0]
+                    
+                } catch (error) {
+                    console.error('❌ Erro de rede ao salvar cliente:', error)
+                    return null
+                }
+            }
+            
+            async atualizarCliente(clienteId, novosDados) {
+                if (!this.isOnline) {
+                    console.log('📱 Modo offline - atualizando cliente localmente')
+                    return null
+                }
+                
+                try {
+                    console.log('💾 Atualizando cliente no Supabase...', clienteId)
+                    
+                    const { data, error } = await this.supabase
+                        .from('clientes')
+                        .update({
+                            nome: novosDados.nome,
+                            codigo: novosDados.codigo,
+                            cnpj: novosDados.cnpj,
+                            telefone: novosDados.telefone,
+                            email: novosDados.email,
+                            contato_responsavel: novosDados.contato,
+                            endereco: `${novosDados.endereco}, ${novosDados.cidade}, ${novosDados.estado}`,
+                            observacoes: novosDados.observacoes
+                        })
+                        .eq('id', clienteId)
+                        .select()
+                    
+                    if (error) {
+                        console.error('❌ Erro ao atualizar cliente no Supabase:', error)
+                        return null
+                    }
+                    
+                    console.log('✅ Cliente atualizado no banco:', data[0])
+                    return data[0]
+                    
+                } catch (error) {
+                    console.error('❌ Erro de rede ao atualizar cliente:', error)
+                    return null
+                }
+            }
+            
+            updateConnectionStatus(online, message) {
+                const statusIndicator = document.getElementById('status-indicator')
+                const statusText = document.getElementById('connection-status')
+                
+                if (statusIndicator && statusText) {
+                    statusIndicator.className = `status-indicator ${online ? 'online' : ''}`
+                    statusText.textContent = message
+                }
+            }
+            
+            async adicionarCarga(cargaData) {
+                if (!this.isOnline) {
+                    console.log('📱 Modo offline - salvando localmente')
+                    return this.adicionarCargaLocal(cargaData)
+                }
+                
+                try {
+                    console.log('💾 Salvando carga no Supabase...')
+                    
+                    const novaCarga = {
+                        data_carga: cargaData.dataCarga || new Date().toISOString().split('T')[0],
+                        origem: cargaData.origem,
+                        destino: cargaData.destino,
+                        motorista_nome: cargaData.motorista,
+                        valor_frete: parseFloat(cargaData.valor),
+                        peso: parseFloat(cargaData.peso || 0),
+                        status: cargaData.status,
+                        observacoes: cargaData.observacoes || '',
+                        mercadoria: 'Geral'
+                    }
+                    
+                    const { data, error } = await this.supabase
+                        .from('cargas')
+                        .insert([novaCarga])
+                        .select()
+                    
+                    if (error) {
+                        console.error('❌ Erro ao salvar no Supabase:', error)
+                        return this.adicionarCargaLocal(cargaData)
+                    }
+                    
+                    console.log('✅ Carga salva no banco:', data[0])
+                    return data[0]
+                    
+                } catch (error) {
+                    console.error('❌ Erro de rede:', error)
+                    return this.adicionarCargaLocal(cargaData)
+                }
+            }
+            
+            async atualizarCarga(cargaId, novosDados) {
+                if (!this.isOnline) {
+                    console.log('📱 Modo offline - atualizando localmente')
+                    return null
+                }
+                
+                try {
+                    console.log('💾 Atualizando carga no Supabase...', cargaId)
+                    
+                    const { data, error } = await this.supabase
+                        .from('cargas')
+                        .update(novosDados)
+                        .eq('id', cargaId)
+                        .select()
+                    
+                    if (error) {
+                        console.error('❌ Erro ao atualizar no Supabase:', error)
+                        return null
+                    }
+                    
+                    console.log('✅ Carga atualizada no banco:', data[0])
+                    return data[0]
+                    
+                } catch (error) {
+                    console.error('❌ Erro de rede ao atualizar:', error)
+                    return null
+                }
+            }
+            
+            adicionarCargaLocal(cargaData) {
+                // Buscar nome do cliente
+                const clienteSelecionado = clientes.find(c => `cliente-${c.id}` === cargaData.cliente);
+                const clienteNome = clienteSelecionado ? clienteSelecionado.nome : 'Cliente';
+                
+                const novaCarga = {
+                    id: cargas.length + 1,
+                    numCarga: Math.max(...cargas.map(c => c.numCarga || 0)) + 1,
+                    dataCarga: new Date(cargaData.dataCarga || new Date()).toLocaleDateString('pt-BR'),
+                    origem: cargaData.origem,
+                    destino: cargaData.destino,
+                    motorista: cargaData.motorista,
+                    cliente: cargaData.cliente,
+                    clienteNome: clienteNome,
+                    peso: cargaData.peso + ' TON',
+                    valor: parseFloat(cargaData.valor),
+                    status: cargaData.status,
+                    observacoes: cargaData.observacoes || ''
+                }
+                
+                cargas.push(novaCarga)
+                return novaCarga
+            }
+        }
+        
+        // Instanciar banco
+        const db = new RocciaDB()
+
+        // Sample data (fallback para modo offline)
+        let cargas = [
+            {
+                id: 1,
+                dataCarga: '24/07/2025',
+                numCarga: 1,
+                origem: 'JAGUARIÚNA SP',
+                destino: 'BARCARENA PA',
+                motorista: 'DIEGO BATISTA CORREIA',
+                cliente: 'cliente-1',
+                clienteNome: 'ALTAG',
+                peso: '20 TON',
+                valor: 2400.00,
+                status: 'entregue',
+                dataEntrega: '30/07/2025',
+                observacoes: 'CARRETA GRANELEIRO 18 PALLETS DE 3 METROS'
+            },
+            {
+                id: 2,
+                dataCarga: '25/07/2025',
+                numCarga: 2,
+                origem: 'BELO HORIZONTE MG',
+                destino: 'RIO VERDE GO',
+                motorista: 'SILVATEAM',
+                cliente: 'cliente-2',
+                clienteNome: 'BAUMINAS',
+                peso: '15 TON',
+                valor: 2100.00,
+                status: 'em-transito',
+                observacoes: 'RAÇÃO ANIMAL'
+            },
+            {
+                id: 3,
+                dataCarga: '26/07/2025',
+                numCarga: 3,
+                origem: 'FLORIANÓPOLIS SC',
+                destino: 'GUARULHOS SP',
+                motorista: 'JOSÉ PEREIRA NUNES',
+                cliente: 'cliente-3',
+                clienteNome: 'BIOPLANTA',
+                peso: '25 TON',
+                valor: 1357.42,
+                status: 'em-transito',
+                observacoes: 'Produtos biológicos'
+            },
+            {
+                id: 4,
+                dataCarga: '27/07/2025',
+                numCarga: 4,
+                origem: 'PORTO ALEGRE RS',
+                destino: 'MANHUMIRIM MG',
+                motorista: 'THIAGO JOSÉ DE LIMA',
+                cliente: 'cliente-4',
+                clienteNome: 'FAIRFEED',
+                peso: '18 TON',
+                valor: 854.27,
+                status: 'em-aberto',
+                observacoes: 'Nutrição animal'
+            }
+        ];
+
+        // Sample data - clientes
+        let clientes = [
+            {
+                id: 1,
+                nome: 'ALTAG',
+                codigo: 'ALT001',
+                cnpj: '11.111.111/0001-11',
+                telefone: '(11) 1111-1111',
+                email: 'contato@altag.com.br',
+                contato: 'João Silva',
+                endereco: 'Rua Industrial, 100',
+                cidade: 'São Paulo',
+                estado: 'SP',
+                ativo: true,
+                observacoes: 'Cliente ativo',
+                created_at: new Date()
+            },
+            {
+                id: 2,
+                nome: 'BAUMINAS',
+                codigo: 'BAU001',
+                cnpj: '22.222.222/0001-22',
+                telefone: '(31) 2222-2222',
+                email: 'logistica@bauminas.com.br',
+                contato: 'Maria Santos',
+                endereco: 'Av. das Minas, 200',
+                cidade: 'Belo Horizonte',
+                estado: 'MG',
+                ativo: true,
+                observacoes: 'Cliente de Minas Gerais',
+                created_at: new Date()
+            },
+            {
+                id: 3,
+                nome: 'BIOPLANTA',
+                codigo: 'BIO001',
+                cnpj: '33.333.333/0001-33',
+                telefone: '(47) 3333-3333',
+                email: 'comercial@bioplanta.com.br',
+                contato: 'Pedro Oliveira',
+                endereco: 'Rod. SC-401, Km 10',
+                cidade: 'Florianópolis',
+                estado: 'SC',
+                ativo: true,
+                observacoes: 'Especializada em produtos biológicos',
+                created_at: new Date()
+            },
+            {
+                id: 4,
+                nome: 'FAIRFEED',
+                codigo: 'FAI001',
+                cnpj: '44.444.444/0001-44',
+                telefone: '(51) 4444-4444',
+                email: 'vendas@fairfeed.com.br',
+                contato: 'Ana Costa',
+                endereco: 'Distrito Industrial, 300',
+                cidade: 'Porto Alegre',
+                estado: 'RS',
+                ativo: true,
+                observacoes: 'Nutrição animal',
+                created_at: new Date()
+            },
+            {
+                id: 5,
+                nome: 'HARVEST WIRST',
+                codigo: 'HAR001',
+                cnpj: '55.555.555/0001-55',
+                telefone: '(19) 5555-5555',
+                email: 'harvest@wirst.com.br',
+                contato: 'Carlos Mendes',
+                endereco: 'Via Anhanguera, 400',
+                cidade: 'Campinas',
+                estado: 'SP',
+                ativo: true,
+                observacoes: 'Processamento de grãos',
+                created_at: new Date()
+            },
+            {
+                id: 6,
+                nome: 'IMBRA',
+                codigo: 'IMB001',
+                cnpj: '66.666.666/0001-66',
+                telefone: '(21) 6666-6666',
+                email: 'contato@imbra.com.br',
+                contato: 'Roberto Silva',
+                endereco: 'Av. Brasil, 500',
+                cidade: 'Rio de Janeiro',
+                estado: 'RJ',
+                ativo: true,
+                observacoes: 'Indústria brasileira',
+                created_at: new Date()
+            },
+            {
+                id: 7,
+                nome: 'KIMBERLIT',
+                codigo: 'KIM001',
+                cnpj: '77.777.777/0001-77',
+                telefone: '(67) 7777-7777',
+                email: 'kimberlit@empresa.com.br',
+                contato: 'Fernanda Lima',
+                endereco: 'Rod. MS-040, Km 15',
+                cidade: 'Campo Grande',
+                estado: 'MS',
+                ativo: true,
+                observacoes: 'Mineração e beneficiamento',
+                created_at: new Date()
+            },
+            {
+                id: 8,
+                nome: 'MELACOS',
+                codigo: 'MEL001',
+                cnpj: '88.888.888/0001-88',
+                telefone: '(16) 8888-8888',
+                email: 'vendas@melacos.com.br',
+                contato: 'Lucas Pereira',
+                endereco: 'Usina São João, s/n',
+                cidade: 'Ribeirão Preto',
+                estado: 'SP',
+                ativo: true,
+                observacoes: 'Produção de melaço',
+                created_at: new Date()
+            },
+            {
+                id: 9,
+                nome: 'ODS',
+                codigo: 'ODS001',
+                cnpj: '99.999.999/0001-99',
+                telefone: '(85) 9999-9999',
+                email: 'ods@contato.com.br',
+                contato: 'Marina Souza',
+                endereco: 'Complexo Portuário, 600',
+                cidade: 'Fortaleza',
+                estado: 'CE',
+                ativo: true,
+                observacoes: 'Operações portuárias',
+                created_at: new Date()
+            },
+            {
+                id: 10,
+                nome: 'ORGUEL',
+                codigo: 'ORG001',
+                cnpj: '10.101.010/0001-10',
+                telefone: '(62) 1010-1010',
+                email: 'orguel@comercial.com.br',
+                contato: 'Rafael Santos',
+                endereco: 'Setor Industrial, 700',
+                cidade: 'Goiânia',
+                estado: 'GO',
+                ativo: true,
+                observacoes: 'Produtos orgânicos',
+                created_at: new Date()
+            },
+            {
+                id: 11,
+                nome: 'SILVA TEAM',
+                codigo: 'SIL001',
+                cnpj: '11.222.333/0001-44',
+                telefone: '(11) 1122-3344',
+                email: 'silvateam@contato.com.br',
+                contato: 'Silvana Silva',
+                endereco: 'Av. Paulista, 800',
+                cidade: 'São Paulo',
+                estado: 'SP',
+                ativo: true,
+                observacoes: 'Equipe especializada',
+                created_at: new Date()
+            },
+            {
+                id: 12,
+                nome: 'TDM',
+                codigo: 'TDM001',
+                cnpj: '12.345.678/0001-90',
+                telefone: '(19) 1234-5678',
+                email: 'tdm@empresa.com.br',
+                contato: 'Marcos Oliveira',
+                endereco: 'Distrito Industrial TDM',
+                cidade: 'Sumaré',
+                estado: 'SP',
+                ativo: true,
+                observacoes: 'Tecnologia e desenvolvimento',
+                created_at: new Date()
+            },
+            {
+                id: 13,
+                nome: 'TROUW NUTRITION',
+                codigo: 'TRO001',
+                cnpj: '13.579.246/0001-35',
+                telefone: '(11) 1357-9246',
+                email: 'trouw@nutrition.com.br',
+                contato: 'Dr. Anderson Lima',
+                endereco: 'Complexo Nutricional, 900',
+                cidade: 'Campinas',
+                estado: 'SP',
+                ativo: true,
+                observacoes: 'Nutrição animal de alta qualidade',
+                created_at: new Date()
+            },
+            {
+                id: 14,
+                nome: 'TUBESTEEL',
+                codigo: 'TUB001',
+                cnpj: '14.682.579/0001-46',
+                telefone: '(41) 1468-2579',
+                email: 'tubesteel@aco.com.br',
+                contato: 'Eng. Paulo Ferro',
+                endereco: 'Zona Industrial, 1000',
+                cidade: 'Curitiba',
+                estado: 'PR',
+                ativo: true,
+                observacoes: 'Tubos e estruturas de aço',
+                created_at: new Date()
+            },
+            {
+                id: 15,
+                nome: 'TUBOS OLIVEIRA',
+                codigo: 'TUO001',
+                cnpj: '15.793.684/0001-57',
+                telefone: '(31) 1579-3684',
+                email: 'tubos@oliveira.com.br',
+                contato: 'José Oliveira',
+                endereco: 'Rod. BR-381, Km 25',
+                cidade: 'Betim',
+                estado: 'MG',
+                ativo: true,
+                observacoes: 'Fabricação de tubos especiais',
+                created_at: new Date()
+            },
+            {
+                id: 16,
+                nome: 'WIRSTCHAT',
+                codigo: 'WIR001',
+                cnpj: '16.248.135/0001-62',
+                telefone: '(51) 1624-8135',
+                email: 'wirstchat@digital.com.br',
+                contato: 'Tech Support',
+                endereco: 'Centro Empresarial, 1100',
+                cidade: 'Porto Alegre',
+                estado: 'RS',
+                ativo: true,
+                observacoes: 'Soluções digitais e comunicação',
+                created_at: new Date()
+            }
+        ];
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Update nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.closest('.nav-link').classList.add('active');
+
+            // Load data for specific sections
+            if (sectionId === 'fretes-andamento' || sectionId === 'dashboard') {
+                renderCargas();
+            } else if (sectionId === 'historico') {
+                renderHistorico();
+            } else if (sectionId === 'clientes') {
+                console.log('📋 Carregando seção clientes...');
+                renderClientes();
+                console.log(`✅ ${clientes.length} clientes carregados`);
+            }
+        }
+
+        function renderCargas() {
+            const grid = document.getElementById('cargas-grid');
+            const recentGrid = document.getElementById('recent-cargas');
+            
+            const cargasAtivas = cargas.filter(carga => carga.status !== 'entregue');
+            const cargasRecentes = cargas.slice(-3);
+            
+            function createCard(carga) {
+                // Obter cor do cliente baseado no novo sistema
+                const clienteId = carga.cliente ? carga.cliente.replace('cliente-', '') : '1';
+                const corCliente = getClienteColor(parseInt(clienteId));
+                
+                return `
+                    <div class="cargo-card ${carga.cliente}" onclick="abrirDetalhesCarga(${carga.id})" style="border-left-color: ${corCliente}">
+                        <div class="card-header">
+                            <span class="cargo-number">CARGA ${String(carga.numCarga).padStart(2, '0')}</span>
+                            <span class="status ${carga.status}">${getStatusText(carga.status)}</span>
+                        </div>
+                        <div class="card-info">
+                            <div class="info-item">
+                                <span class="info-label">Origem</span>
+                                <span class="info-value">${carga.origem}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Destino</span>
+                                <span class="info-value">${carga.destino}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Motorista</span>
+                                <span class="info-value">${carga.motorista}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Valor</span>
+                                <span class="info-value">R$ ${carga.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            </div>
+                        </div>
+                        <div class="click-hint" style="text-align: center; margin-top: 1rem; color: #7f8c8d; font-size: 0.8rem;">
+                            👆 Clique para ver detalhes completos
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (grid) {
+                grid.innerHTML = cargasAtivas.map(createCard).join('');
+            }
+            
+            if (recentGrid) {
+                recentGrid.innerHTML = cargasRecentes.map(createCard).join('');
+            }
+        }
+
+        function renderHistorico() {
+            const grid = document.getElementById('historico-grid');
+            const cargasEntregues = cargas.filter(carga => carga.status === 'entregue');
+            
+            function createHistoricoCard(carga) {
+                // Obter cor do cliente baseado no novo sistema
+                const clienteId = carga.cliente ? carga.cliente.replace('cliente-', '') : '1';
+                const corCliente = getClienteColor(parseInt(clienteId));
+                
+                return `
+                    <div class="cargo-card ${carga.cliente}" onclick="abrirDetalhesCarga(${carga.id})" style="border-left-color: ${corCliente}">
+                        <div class="card-header">
+                            <span class="cargo-number">CARGA ${String(carga.numCarga).padStart(2, '0')}</span>
+                            <span class="status ${carga.status}">${getStatusText(carga.status)}</span>
+                        </div>
+                        <div class="card-info">
+                            <div class="info-item">
+                                <span class="info-label">Origem</span>
+                                <span class="info-value">${carga.origem}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Destino</span>
+                                <span class="info-value">${carga.destino}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Motorista</span>
+                                <span class="info-value">${carga.motorista}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Valor</span>
+                                <span class="info-value">R$ ${carga.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Data Entrega</span>
+                                <span class="info-value">${carga.dataEntrega}</span>
+                            </div>
+                        </div>
+                        <div class="click-hint" style="text-align: center; margin-top: 1rem; color: #7f8c8d; font-size: 0.8rem;">
+                            👆 Clique para ver detalhes completos
+                        </div>
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = cargasEntregues.map(createHistoricoCard).join('');
+        }
+
+        // =====================
+        // GESTÃO DE CLIENTES
+        // =====================
+
+        function getClienteColor(clienteId) {
+            const cores = [
+                '#B71C1C', '#D32F2F', '#757575', '#8B0000', '#424242',
+                '#5D4037', '#BF360C', '#6A1B9A', '#E65100', '#1565C0',
+                '#2E7D32', '#F57C00', '#7B1FA2', '#0277BD', '#388E3C', '#FF5722'
+            ];
+            return cores[(clienteId - 1) % cores.length];
+        }
+
+        function renderClientes() {
+            console.log('🏢 Iniciando renderização de clientes...');
+            const grid = document.getElementById('clientes-grid');
+            
+            if (!grid) {
+                console.error('❌ Elemento clientes-grid não encontrado!');
+                return;
+            }
+            
+            console.log(`📊 Renderizando ${clientes.length} clientes`);
+            
+            function createClienteCard(cliente) {
+                const totalCargas = cargas.filter(c => c.clienteNome === cliente.nome || c.cliente === `cliente-${cliente.id}`).length;
+                const receitaTotal = cargas
+                    .filter(c => c.clienteNome === cliente.nome || c.cliente === `cliente-${cliente.id}`)
+                    .reduce((sum, c) => sum + c.valor, 0);
+                
+                return `
+                    <div class="cargo-card cliente-${cliente.id}" onclick="abrirDetalhesCliente(${cliente.id})" style="border-left-color: ${getClienteColor(cliente.id)}">
+                        <div class="card-header">
+                            <span class="cargo-number">${cliente.codigo || 'CLI' + String(cliente.id).padStart(3, '0')}</span>
+                            <span class="status ${cliente.ativo ? 'entregue' : 'em-aberto'}">
+                                ${cliente.ativo ? 'Ativo' : 'Inativo'}
+                            </span>
+                        </div>
+                        <div class="card-info">
+                            <div class="info-item">
+                                <span class="info-label">Razão Social</span>
+                                <span class="info-value">${cliente.nome}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">CNPJ</span>
+                                <span class="info-value">${cliente.cnpj || '-'}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Telefone</span>
+                                <span class="info-value">${cliente.telefone || '-'}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Cidade</span>
+                                <span class="info-value">${cliente.cidade}/${cliente.estado}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Total Cargas</span>
+                                <span class="info-value">${totalCargas}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Receita Gerada</span>
+                                <span class="info-value">R$ ${receitaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            </div>
+                        </div>
+                        <div class="click-hint">
+                            👆 Clique para ver detalhes completos
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const clientesHtml = clientes.map(createClienteCard).join('');
+            grid.innerHTML = clientesHtml;
+            
+            console.log('✅ Clientes renderizados com sucesso!');
+        }
+
+        function abrirDetalhesCliente(id) {
+            const cliente = clientes.find(c => c.id === id);
+            if (!cliente) {
+                console.error('Cliente não encontrado:', id);
+                return;
+            }
+
+            // Calcular estatísticas do cliente
+            const cargasCliente = cargas.filter(c => c.clienteNome === cliente.nome || c.cliente === `cliente-${cliente.id}`);
+            const totalCargas = cargasCliente.length;
+            const receitaTotal = cargasCliente.reduce((sum, c) => sum + c.valor, 0);
+            const ultimaCarga = cargasCliente.length > 0 ? 
+                Math.max(...cargasCliente.map(c => new Date(c.dataCarga.split('/').reverse().join('-')).getTime())) : null;
+            const ultimaCargaFormatada = ultimaCarga ? 
+                new Date(ultimaCarga).toLocaleDateString('pt-BR') : 'Nunca';
+
+            // Preencher dados no modal
+            document.getElementById('cliente-detalhes-titulo').textContent = `Cliente: ${cliente.nome}`;
+            document.getElementById('cliente-detalhes-nome').textContent = cliente.nome;
+            
+            // Status com cores
+            const statusElement = document.getElementById('cliente-detalhes-status-ativo');
+            statusElement.textContent = cliente.ativo ? 'ATIVO' : 'INATIVO';
+            statusElement.className = `detalhes-status ${cliente.ativo ? 'entregue' : 'em-aberto'}`;
+            
+            // Dados do cliente
+            document.getElementById('cliente-detalhes-razao').textContent = cliente.nome;
+            document.getElementById('cliente-detalhes-cnpj').textContent = cliente.cnpj || '-';
+            document.getElementById('cliente-detalhes-codigo').textContent = cliente.codigo || `CLI${String(cliente.id).padStart(3, '0')}`;
+            document.getElementById('cliente-detalhes-telefone').textContent = cliente.telefone || '-';
+            document.getElementById('cliente-detalhes-email').textContent = cliente.email || '-';
+            document.getElementById('cliente-detalhes-contato').textContent = cliente.contato || '-';
+            document.getElementById('cliente-detalhes-endereco').textContent = cliente.endereco || '-';
+            document.getElementById('cliente-detalhes-cidade').textContent = cliente.cidade || '-';
+            document.getElementById('cliente-detalhes-estado').textContent = cliente.estado || '-';
+            document.getElementById('cliente-detalhes-observacoes').textContent = cliente.observacoes || '-';
+            
+            // Estatísticas
+            document.getElementById('cliente-detalhes-total-cargas').textContent = totalCargas;
+            document.getElementById('cliente-detalhes-receita').textContent = 
+                `R$ ${receitaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('cliente-detalhes-ultima-carga').textContent = ultimaCargaFormatada;
+            
+            // Salvar ID do cliente atual para as ações
+            window.clienteAtualId = id;
+            
+            // Abrir modal
+            document.getElementById('cliente-detalhes-modal').style.display = 'block';
+        }
+
+        function closeClienteDetalhesModal() {
+            document.getElementById('cliente-detalhes-modal').style.display = 'none';
+            window.clienteAtualId = null;
+        }
+
+        function openClienteModal() {
+            document.getElementById('cliente-modal').style.display = 'block';
+            document.getElementById('cliente-modal-titulo').textContent = 'Novo Cliente';
+        }
+
+        function closeClienteModal() {
+            document.getElementById('cliente-modal').style.display = 'none';
+            document.getElementById('cliente-form').reset();
+            window.editandoCliente = null;
+            document.getElementById('cliente-modal-titulo').textContent = 'Novo Cliente';
+        }
+
+        function editarCliente() {
+            if (!window.clienteAtualId) return;
+            
+            const cliente = clientes.find(c => c.id === window.clienteAtualId);
+            if (!cliente) return;
+            
+            // Fechar modal de detalhes
+            closeClienteDetalhesModal();
+            
+            // Preencher formulário de edição
+            document.getElementById('cliente-nome').value = cliente.nome;
+            document.getElementById('cliente-codigo').value = cliente.codigo || '';
+            document.getElementById('cliente-cnpj').value = cliente.cnpj || '';
+            document.getElementById('cliente-telefone').value = cliente.telefone || '';
+            document.getElementById('cliente-email').value = cliente.email || '';
+            document.getElementById('cliente-contato').value = cliente.contato || '';
+            document.getElementById('cliente-endereco').value = cliente.endereco || '';
+            document.getElementById('cliente-cidade').value = cliente.cidade || '';
+            document.getElementById('cliente-estado').value = cliente.estado || '';
+            document.getElementById('cliente-observacoes').value = cliente.observacoes || '';
+            
+            // Alterar título do modal
+            document.getElementById('cliente-modal-titulo').textContent = `Editar Cliente: ${cliente.nome}`;
+            
+            // Marcar como edição
+            window.editandoCliente = window.clienteAtualId;
+            
+            // Abrir modal de edição
+            openClienteModal();
+        }
+
+        function verCargasCliente() {
+            if (!window.clienteAtualId) return;
+            
+            const cliente = clientes.find(c => c.id === window.clienteAtualId);
+            if (!cliente) return;
+            
+            // Filtrar cargas do cliente
+            const cargasCliente = cargas.filter(c => 
+                c.clienteNome === cliente.nome || c.cliente === `cliente-${cliente.id}`
+            );
+            
+            if (cargasCliente.length === 0) {
+                alert(`Nenhuma carga encontrada para o cliente ${cliente.nome}`);
+                return;
+            }
+            
+            // Fechar modal de detalhes
+            closeClienteDetalhesModal();
+            
+            // Ir para seção de histórico e filtrar
+            showSection('historico');
+            
+            // Simular filtro por cliente (implementação básica)
+            alert(`Encontradas ${cargasCliente.length} cargas para ${cliente.nome}.\nImplementação de filtro avançado em desenvolvimento.`);
+        }
+
+        function toggleClienteAtivo() {
+            if (!window.clienteAtualId) return;
+            
+            const cliente = clientes.find(c => c.id === window.clienteAtualId);
+            if (!cliente) return;
+            
+            const novoStatus = !cliente.ativo;
+            const acao = novoStatus ? 'ativar' : 'desativar';
+            
+            if (confirm(`Deseja ${acao} o cliente ${cliente.nome}?`)) {
+                cliente.ativo = novoStatus;
+                
+                // Atualizar observações se estiver desativando
+                if (!novoStatus && !cliente.observacoes.includes('inativo')) {
+                    cliente.observacoes = (cliente.observacoes || '') + 
+                        `\nCliente desativado em ${new Date().toLocaleDateString('pt-BR')}`;
+                }
+                
+                // Salvar no Supabase se estiver online
+                if (db.isOnline) {
+                    db.atualizarCliente(window.clienteAtualId, {
+                        ...cliente,
+                        ativo: novoStatus
+                    }).then(result => {
+                        if (result) {
+                            console.log('✅ Status do cliente atualizado no Supabase');
+                        } else {
+                            console.warn('⚠️ Erro ao atualizar no Supabase, mantendo alteração local');
+                        }
+                    }).catch(error => {
+                        console.error('❌ Erro ao atualizar status no Supabase:', error);
+                    });
+                }
+                
+                renderClientes();
+                atualizarSelectClientes(); // Atualizar select de clientes
+                closeClienteDetalhesModal();
+                
+                alert(`Cliente ${novoStatus ? 'ativado' : 'desativado'} com sucesso!`);
+            }
+        }
+
+        // Form submission para clientes
+        document.getElementById('cliente-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const clienteData = {
+                nome: document.getElementById('cliente-nome').value,
+                codigo: document.getElementById('cliente-codigo').value,
+                cnpj: document.getElementById('cliente-cnpj').value,
+                telefone: document.getElementById('cliente-telefone').value,
+                email: document.getElementById('cliente-email').value,
+                contato: document.getElementById('cliente-contato').value,
+                endereco: document.getElementById('cliente-endereco').value,
+                cidade: document.getElementById('cliente-cidade').value,
+                estado: document.getElementById('cliente-estado').value,
+                observacoes: document.getElementById('cliente-observacoes').value
+            };
+            
+            try {
+                if (window.editandoCliente) {
+                    // EDIÇÃO de cliente existente
+                    console.log('✏️ Editando cliente ID:', window.editandoCliente);
+                    
+                    const cliente = clientes.find(c => c.id === window.editandoCliente);
+                    if (cliente) {
+                        // Tentar salvar no Supabase primeiro
+                        if (db.isOnline) {
+                            const clienteAtualizado = await db.atualizarCliente(window.editandoCliente, clienteData);
+                            if (clienteAtualizado) {
+                                // Atualizar dados locais com resposta do Supabase
+                                Object.assign(cliente, {
+                                    ...clienteData,
+                                    endereco: `${clienteData.endereco}, ${clienteData.cidade}, ${clienteData.estado}`
+                                });
+                                alert('Cliente atualizado no banco de dados!');
+                            } else {
+                                throw new Error('Erro ao atualizar no Supabase');
+                            }
+                        } else {
+                            // Atualizar apenas localmente
+                            Object.assign(cliente, clienteData);
+                            alert('Cliente atualizado localmente!');
+                        }
+                    }
+                    
+                } else {
+                    // NOVO cliente
+                    console.log('👤 Criando novo cliente...');
+                    
+                    if (db.isOnline) {
+                        // Salvar no Supabase
+                        const novoCliente = await db.adicionarCliente(clienteData);
+                        if (novoCliente) {
+                            // Adicionar aos dados locais
+                            clientes.push({
+                                id: novoCliente.id,
+                                ...clienteData,
+                                ativo: true,
+                                created_at: new Date(novoCliente.created_at)
+                            });
+                            alert('Cliente salvo no banco de dados!');
+                        } else {
+                            throw new Error('Erro ao salvar no Supabase');
+                        }
+                    } else {
+                        // Salvar apenas localmente
+                        const novoCliente = {
+                            id: Math.max(...clientes.map(c => c.id), 0) + 1,
+                            ...clienteData,
+                            ativo: true,
+                            created_at: new Date()
+                        };
+                        clientes.push(novoCliente);
+                        alert('Cliente salvo localmente (será sincronizado quando conectar)!');
+                    }
+                }
+                
+                closeClienteModal();
+                renderClientes();
+                atualizarSelectClientes();
+                    
+            } catch (error) {
+                console.error('❌ Erro ao salvar/editar cliente:', error);
+                alert('Erro ao salvar cliente. Tente novamente.');
+            }
+        });
+
+        function getStatusText(status) {
+            const statusMap = {
+                'em-transito': 'Em Trânsito',
+                'entregue': 'Entregue',
+                'em-aberto': 'Em Aberto'
+            };
+            return statusMap[status] || status;
+        }
+
+        function openModal() {
+            document.getElementById('modal').style.display = 'block';
+            
+            // Atualizar lista de clientes no select
+            atualizarSelectClientes();
+            
+            // Se não estiver editando, configurar para nova carga
+            if (!window.editandoCarga) {
+                // Set today's date as default
+                document.getElementById('data-carga').value = new Date().toISOString().split('T')[0];
+                document.querySelector('#modal h2').textContent = 'Nova Carga';
+            }
+        }
+
+        function atualizarSelectClientes() {
+            const select = document.getElementById('cliente');
+            
+            // Limpar opções existentes exceto a primeira
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Adicionar clientes ativos
+            const clientesAtivos = clientes.filter(c => c.ativo);
+            clientesAtivos.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = `cliente-${cliente.id}`;
+                option.textContent = cliente.nome;
+                select.appendChild(option);
+            });
+            
+            console.log(`✅ Select atualizado com ${clientesAtivos.length} clientes ativos`);
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('carga-form').reset();
+            // Reset edição
+            window.editandoCarga = null;
+            document.querySelector('#modal h2').textContent = 'Nova Carga';
+        }
+
+        function viewCarga(id) {
+            // Função antiga - redirecionada para nova função
+            abrirDetalhesCarga(id);
+        }
+
+        function abrirDetalhesCarga(id) {
+            const carga = cargas.find(c => c.id === id);
+            if (!carga) {
+                console.error('Carga não encontrada:', id);
+                return;
+            }
+
+            // Preencher dados no modal
+            document.getElementById('detalhes-titulo').textContent = `Detalhes da Carga ${String(carga.numCarga).padStart(2, '0')}`;
+            document.getElementById('detalhes-numero').textContent = `CARGA ${String(carga.numCarga).padStart(2, '0')}`;
+            
+            // Status com cores
+            const statusElement = document.getElementById('detalhes-status');
+            statusElement.textContent = getStatusText(carga.status);
+            statusElement.className = `detalhes-status ${carga.status}`;
+            
+            // Dados da carga
+            document.getElementById('detalhes-origem').textContent = carga.origem;
+            document.getElementById('detalhes-destino').textContent = carga.destino;
+            document.getElementById('detalhes-motorista').textContent = carga.motorista;
+            document.getElementById('detalhes-cliente').textContent = carga.clienteNome || carga.cliente;
+            document.getElementById('detalhes-peso').textContent = carga.peso || '-';
+            document.getElementById('detalhes-valor').textContent = `R$ ${carga.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('detalhes-data-carga').textContent = carga.dataCarga;
+            document.getElementById('detalhes-data-entrega').textContent = carga.dataEntrega || '-';
+            document.getElementById('detalhes-observacoes').textContent = carga.observacoes || '-';
+            
+            // Calcular comissão (80% do valor)
+            const comissao = carga.valor * 0.8;
+            document.getElementById('detalhes-comissao').textContent = `R$ ${comissao.toLocaleString('pt-BR', {minimumFractionDigits: 2})} (80%)`;
+            
+            // Salvar ID da carga atual para as ações
+            window.cargaAtualId = id;
+            
+            // Abrir modal
+            document.getElementById('detalhes-modal').style.display = 'block';
+        }
+
+        function closeDetalhesModal() {
+            document.getElementById('detalhes-modal').style.display = 'none';
+            window.cargaAtualId = null;
+        }
+
+        function editarCarga() {
+            if (!window.cargaAtualId) return;
+            
+            const carga = cargas.find(c => c.id === window.cargaAtualId);
+            if (!carga) return;
+            
+            // Fechar modal de detalhes
+            closeDetalhesModal();
+            
+            // Preencher formulário de edição
+            document.getElementById('data-carga').value = carga.dataCarga.split('/').reverse().join('-'); // Converter DD/MM/YYYY para YYYY-MM-DD
+            document.getElementById('origem').value = carga.origem;
+            document.getElementById('destino').value = carga.destino;
+            document.getElementById('motorista').value = carga.motorista;
+            document.getElementById('cliente').value = carga.cliente;
+            document.getElementById('peso').value = parseFloat(carga.peso) || '';
+            document.getElementById('valor').value = carga.valor;
+            document.getElementById('status').value = carga.status;
+            document.getElementById('observacoes').value = carga.observacoes || '';
+            
+            // Alterar título do modal
+            document.querySelector('#modal h2').textContent = `Editar Carga ${String(carga.numCarga).padStart(2, '0')}`;
+            
+            // Marcar como edição
+            window.editandoCarga = window.cargaAtualId;
+            
+            // Abrir modal de edição
+            openModal();
+        }
+
+        function marcarEntregue() {
+            if (!window.cargaAtualId) return;
+            
+            if (confirm('Marcar esta carga como entregue?')) {
+                const carga = cargas.find(c => c.id === window.cargaAtualId);
+                if (carga) {
+                    carga.status = 'entregue';
+                    carga.dataEntrega = new Date().toLocaleDateString('pt-BR');
+                    
+                    // Salvar no Supabase se estiver online
+                    if (db.isOnline) {
+                        db.atualizarCarga(window.cargaAtualId, {
+                            status: 'entregue',
+                            data_entrega: new Date().toISOString().split('T')[0]
+                        }).catch(console.error);
+                    }
+                    
+                    renderCargas();
+                    updateStats();
+                    closeDetalhesModal();
+                    
+                    alert('Carga marcada como entregue!');
+                }
+            }
+        }
+
+        function gerarRelatorio() {
+            if (!window.cargaAtualId) return;
+            
+            const carga = cargas.find(c => c.id === window.cargaAtualId);
+            if (!carga) return;
+            
+            const relatorio = `
+RELATÓRIO DA CARGA ${String(carga.numCarga).padStart(2, '0')}
+===============================
+
+📍 ROTA:
+   Origem: ${carga.origem}
+   Destino: ${carga.destino}
+
+👨‍💼 RESPONSÁVEIS:
+   Motorista: ${carga.motorista}
+   Cliente: ${carga.clienteNome || carga.cliente}
+
+📦 CARGA:
+   Peso: ${carga.peso || '-'}
+   Mercadoria: Geral
+
+💰 FINANCEIRO:
+   Valor do Frete: R$ ${carga.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+   Comissão Motorista: R$ ${(carga.valor * 0.8).toLocaleString('pt-BR', {minimumFractionDigits: 2})} (80%)
+
+📅 DATAS:
+   Data da Carga: ${carga.dataCarga}
+   Data de Entrega: ${carga.dataEntrega || 'Pendente'}
+
+📝 STATUS: ${getStatusText(carga.status)}
+
+📝 OBSERVAÇÕES:
+${carga.observacoes || 'Nenhuma observação registrada.'}
+
+===============================
+Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
+            `.trim();
+            
+            // Criar blob e fazer download
+            const blob = new Blob([relatorio], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Relatorio_Carga_${String(carga.numCarga).padStart(2, '0')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('Relatório baixado com sucesso!');
+        }
+
+        // Form submission
+        document.getElementById('carga-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const cargaData = {
+                dataCarga: document.getElementById('data-carga').value,
+                origem: document.getElementById('origem').value,
+                destino: document.getElementById('destino').value,
+                motorista: document.getElementById('motorista').value,
+                cliente: document.getElementById('cliente').value,
+                peso: document.getElementById('peso').value,
+                valor: document.getElementById('valor').value,
+                status: document.getElementById('status').value,
+                observacoes: document.getElementById('observacoes').value
+            };
+            
+            try {
+                // Verificar se o sistema está inicializado
+                if (typeof db === 'undefined') {
+                    console.warn('⚠️ Sistema ainda não inicializou, salvando localmente...');
+                    // Fallback para salvamento local
+                    const newCarga = {
+                        id: cargas.length + 1,
+                        numCarga: Math.max(...cargas.map(c => c.numCarga || 0)) + 1,
+                        dataCarga: new Date(cargaData.dataCarga).toLocaleDateString('pt-BR'),
+                        origem: cargaData.origem,
+                        destino: cargaData.destino,
+                        motorista: cargaData.motorista,
+                        cliente: cargaData.cliente,
+                        clienteNome: document.getElementById('cliente').selectedOptions[0]?.text || 'Cliente',
+                        peso: cargaData.peso + ' TON',
+                        valor: parseFloat(cargaData.valor),
+                        status: cargaData.status,
+                        observacoes: cargaData.observacoes || ''
+                    };
+                    cargas.push(newCarga);
+                    
+                    closeModal();
+                    renderCargas();
+                    updateStats();
+                    alert('Carga salva localmente!');
+                    return;
+                }
+                
+                if (window.editandoCarga) {
+                    // EDIÇÃO de carga existente
+                    console.log('✏️ Editando carga ID:', window.editandoCarga);
+                    
+                    const carga = cargas.find(c => c.id === window.editandoCarga);
+                    if (carga) {
+                        // Atualizar dados locais
+                        carga.dataCarga = new Date(cargaData.dataCarga).toLocaleDateString('pt-BR');
+                        carga.origem = cargaData.origem;
+                        carga.destino = cargaData.destino;
+                        carga.motorista = cargaData.motorista;
+                        carga.cliente = cargaData.cliente;
+                        
+                        // Buscar nome do cliente
+                        const clienteSelecionado = clientes.find(c => `cliente-${c.id}` === cargaData.cliente);
+                        carga.clienteNome = clienteSelecionado ? clienteSelecionado.nome : carga.clienteNome;
+                        
+                        carga.peso = cargaData.peso + ' TON';
+                        carga.valor = parseFloat(cargaData.valor);
+                        carga.status = cargaData.status;
+                        carga.observacoes = cargaData.observacoes;
+                        
+                        // Salvar no Supabase se estiver online
+                        if (db.isOnline) {
+                            await db.atualizarCarga(window.editandoCarga, {
+                                data_carga: cargaData.dataCarga,
+                                origem: cargaData.origem,
+                                destino: cargaData.destino,
+                                motorista_nome: cargaData.motorista,
+                                valor_frete: parseFloat(cargaData.valor),
+                                peso: parseFloat(cargaData.peso || 0),
+                                status: cargaData.status,
+                                observacoes: cargaData.observacoes || ''
+                            });
+                        }
+                        
+                        alert(db.isOnline ? 'Carga atualizada no banco de dados!' : 'Carga atualizada localmente!');
+                    }
+                    
+                } else {
+                    // NOVA carga
+                    console.log('💾 Criando nova carga...');
+                    const novaCarga = await db.adicionarCarga(cargaData);
+                    
+                    if (!novaCarga) {
+                        throw new Error('Falha ao salvar carga')
+                    }
+                    
+                    const mensagem = db.isOnline ? 
+                        'Carga salva no banco de dados!' : 
+                        'Carga salva localmente (será sincronizada quando conectar)!';
+                    
+                    alert(mensagem);
+                    console.log('✅ Carga salva com sucesso!')
+                }
+                
+                closeModal();
+                renderCargas();
+                updateStats();
+                    
+            } catch (error) {
+                console.error('❌ Erro ao salvar/editar carga:', error);
+                alert('Erro ao salvar carga. Tente novamente.');
+            }
+        });
+
+        function updateStats() {
+            const totalCargas = cargas.filter(c => c.status !== 'entregue').length;
+            const emTransito = cargas.filter(c => c.status === 'em-transito').length;
+            const entregues = cargas.filter(c => c.status === 'entregue').length;
+            
+            document.getElementById('total-cargas').textContent = totalCargas;
+            document.getElementById('em-transito').textContent = emTransito;
+            document.getElementById('entregues').textContent = entregues;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Set current date
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            console.log('🚀 Iniciando interface do sistema...');
+            
+            // Aguardar que o sistema seja inicializado
+            let tentativasInterface = 0;
+            const maxTentativasInterface = 20;
+            
+            const aguardarSistema = () => {
+                if (typeof db !== 'undefined') {
+                    console.log('✅ Sistema pronto, carregando interface...');
+                    
+                    // Carregar dados iniciais da interface
+                    renderCargas();
+                    renderClientes();
+                    atualizarSelectClientes();
+                    updateStats();
+                    
+                    console.log(`📋 ${clientes.length} clientes disponíveis`);
+                    console.log('✅ Interface carregada com sucesso!');
+                    
+                } else if (tentativasInterface < maxTentativasInterface) {
+                    tentativasInterface++;
+                    console.log(`⏳ Aguardando sistema... ${tentativasInterface}/${maxTentativasInterface}`);
+                    setTimeout(aguardarSistema, 250);
+                } else {
+                    console.warn('⚠️ Sistema não inicializou completamente, carregando interface básica...');
+                    
+                    // Carregar interface mesmo sem DB
+                    renderCargas();
+                    renderClientes();
+                    atualizarSelectClientes();
+                    updateStats();
+                }
+            };
+            
+            // Iniciar aguardo
+            setTimeout(aguardarSistema, 100);
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            const detalhesModal = document.getElementById('detalhes-modal');
+            const clienteModal = document.getElementById('cliente-modal');
+            const clienteDetalhesModal = document.getElementById('cliente-detalhes-modal');
+            
+            if (event.target === modal) {
+                closeModal();
+            }
+            if (event.target === detalhesModal) {
+                closeDetalhesModal();
+            }
+            if (event.target === clienteModal) {
+                closeClienteModal();
+            }
+            if (event.target === clienteDetalhesModal) {
+                closeClienteDetalhesModal();
+            }
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeDetalhesModal();
+                closeClienteModal();
+                closeClienteDetalhesModal();
+            }
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                openModal();
+            }
+        });
+    </script>
+</body>
+</html>
